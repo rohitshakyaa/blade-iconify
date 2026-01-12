@@ -1,0 +1,31 @@
+{
+    "name": "rohitshakya/blade-iconify",
+    "description": "Custom Iconify-based icon set for Blade Icons (Blade UI Kit), usable with TallStackUI.",
+    "keywords": [
+        "laravel",
+        "blade",
+        "icons",
+        "iconify",
+        "tallstackui",
+        "blade-icons"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "blade-ui-kit/blade-icons": "^1.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "RohitShakya\\BladeIconify\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "RohitShakya\\BladeIconify\\BladeIconifyServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
