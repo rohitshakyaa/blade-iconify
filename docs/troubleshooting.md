@@ -16,7 +16,9 @@ Fix checklist:
 php artisan iconify:extract-svgs --overwrite
 ```
 
-- Confirm the SVG file exists in `resources/svg/` and matches the name `{set}-{icon}.svg`
+- Confirm the SVG file exists in the expected folder and matches the name `{set}-{icon}.svg`
+  - If you set `export_to=project` → `resources/svg`
+  - If you set `export_to=package` → `vendor/rohitshakya/blade-iconify/resources/svg`
 
 ## 2) `Unable to locate set ...`
 
@@ -29,9 +31,11 @@ What to do:
 
 ## 3) Icons not registering / components not found
 
-The service provider registers a Blade Icons set pointing at:
+The service provider registers a Blade Icons set pointing at a folder controlled by `config('blade-iconify.export_to')`:
 
-- `vendor/rohitshakya/blade-iconify/resources/svg`
+- `package` → `vendor/rohitshakya/blade-iconify/resources/svg`
+- `project` → `resources/svg`
+- `custom` → `base_path(custom_path)`
 
 Make sure:
 

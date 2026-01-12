@@ -15,7 +15,40 @@ It will:
    - wrap it into a valid `<svg ...>` element
 3. Write the file as:
 
-- `resources/svg/{set}-{icon}.svg`
+- `{output}/...` (see **Output location** below)
+
+## Output location
+
+You can control where SVGs are written/read from in **three ways**.
+
+### 1) Config (recommended)
+
+In `config/blade-iconify.php`:
+
+```php
+'export_to' => 'package', // package|project|custom
+'custom_path' => null,
+```
+
+- `package` (default): `{package}/resources/svg`
+- `project`: `{app}/resources/svg`
+- `custom`: `base_path(custom_path)`
+
+### 2) CLI flag (one-off)
+
+```bash
+php artisan iconify:extract-svgs --project
+```
+
+This forces output to your app’s `resources/svg`.
+
+### 3) Custom path (one-off)
+
+```bash
+php artisan iconify:extract-svgs --path=resources/icons
+```
+
+`--path` is relative to your project root (`base_path()`).
 
 ## Options
 
@@ -46,40 +79,22 @@ The command uses:
 Finder::locate($setName)
 ```
 
-So your app must have an Iconify JSON source that `Finder` can locate.
-
-Common approaches:
-
-- Install a PHP package that provides Iconify JSON sets + a `Finder` locator
-- Vendor the needed JSON sets in your repo and adjust `Finder` to point there (advanced)
+So your app must have Iconify JSON sets available in a place that `Finder` can locate.
 
 If you get errors like “Unable to locate set …”, see the troubleshooting doc.
 
+## Cache icons (recommended)
 
-### Cache Icons (Recommended in Production)
+Blade Icons caches discovered icons for performance.
+
+After generating new SVGs (especially in production), run:
 
 ```bash
 php artisan icons:cache
 ```
 
-This command scans all registered icon sets and caches them for faster performance in production.
-
-👉 You should run this after:
-
-* Installing the package
-* Generating new SVG icons
-* Deploying to production
-
-### Clear Icon Cache
+If you add/remove SVGs during development and icons don’t update, clear the cache:
 
 ```bash
 php artisan icons:clear
 ```
-
-This clears the Blade Icons cache.
-
-👉 Use this when:
-
-* You add/remove SVG files
-* Icons are not showing after regeneration
-* During development

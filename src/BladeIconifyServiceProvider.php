@@ -24,7 +24,7 @@ final class BladeIconifyServiceProvider extends ServiceProvider
             // Global prefix for all sets (default: "rsi")
             $globalSetPrefix = (string) ($config->get('blade-iconify.set_prefix') ?? 'rsi');
 
-            $basePath = __DIR__ . '/../resources/svg';
+            $basePath = $this->resolveIconSvgPath($config);
 
             if (!File::isDirectory($basePath)) {
                 return;
@@ -54,5 +54,34 @@ final class BladeIconifyServiceProvider extends ServiceProvider
     private function registerConfig(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/blade-iconify.php', 'blade-iconify');
+    }
+
+    /**
+     * Decide where Blade Icons should read SVGs from.
+     *
+     * Mirrors the extraction command output selection:
+     *  - export_to=package  => {package}/resources/svg
+     *  - export_to=project  => {app}/resources/svg
+     *  - export_to=custom   => base_path(custom_path)
+     */
+    private function resolveIconSvgPath(ConfigRepository $config): string
+    {
+        $mode = (string) ($config->get('blade-iconify.export_to') ?? 'package');
+
+        if ($mode === 'project') {
+            return resource_path('svg');
+        }
+
+        if ($mode === 'custom') {
+            $rel = (string) ($config->get('blade-iconify.custom_path') ?? '');
+            if (trim($rel) !== '') {
+                return base_path(trim($rel));
+            }
+
+            // Misconfigured, fall back safely
+            return __DIR__ . '/../resources/svg';
+        }
+
+        return __DIR__ . '/../resources/svg';
     }
 }

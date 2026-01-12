@@ -13,6 +13,26 @@ return [
 
     /*
     | ----------------------------------------------------------------------
+    | Where should generated SVGs be written/read from?
+    | ----------------------------------------------------------------------
+    |
+    | This package can generate SVG files into:
+    |
+    |  - "package" : {package}/resources/svg (default)
+    |  - "project" : {app}/resources/svg
+    |  - "custom"  : any custom relative path from your project root
+    |
+    | IMPORTANT:
+    | - This also controls where Blade Icons will look for the SVGs.
+    | - For production, run: php artisan icons:cache
+    */
+    'export_to' => 'package', // package|project|custom
+
+    // Only used when export_to = "custom" (relative to base_path()).
+    'custom_path' => null,
+
+    /*
+    | ----------------------------------------------------------------------
     | Whitelist of icons to load/register.
     | ----------------------------------------------------------------------
     |

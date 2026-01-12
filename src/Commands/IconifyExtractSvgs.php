@@ -5,6 +5,7 @@ namespace RohitShakya\BladeIconify\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Iconify\IconsJSON\Finder;
+use Illuminate\Support\Facades\Artisan;
 use Throwable;
 
 class IconifyExtractSvgs extends Command
@@ -13,9 +14,12 @@ class IconifyExtractSvgs extends Command
      * Example:
      *  php artisan iconify:extract-svgs
      *  php artisan iconify:extract-svgs --overwrite --optimize
-     *  php artisan iconify:extract-svgs --out=resources/svg
+     *  php artisan iconify:extract-svgs --project
+     *  php artisan iconify:extract-svgs --path=resources/svg
      */
     protected $signature = 'iconify:extract-svgs
+        {--project : Export SVGs to the host project (resources/svg)}
+        {--path= : Custom output path (relative to project root, e.g. resources/svg)}
         {--overwrite : Overwrite existing svg files}
         {--optimize : Basic cleanup (trim + normalize newlines)}
     ';
@@ -33,8 +37,7 @@ class IconifyExtractSvgs extends Command
         }
 
         $packageRoot = $this->packageRoot();
-        $outRel = 'resources/svg';
-        $outDir = $this->normalizePath($packageRoot . DIRECTORY_SEPARATOR . $outRel);
+        [$outDir, $outMode] = $this->resolveOutputDirectory($packageRoot);
 
         File::ensureDirectoryExists($outDir);
 
@@ -44,6 +47,7 @@ class IconifyExtractSvgs extends Command
         $this->newLine();
         $this->line('<info>Blade Iconify</info> — SVG extraction');
         $this->line('Output: <comment>' . $this->relativeToCwd($outDir) . "</comment>");
+        $this->line('Output mode: <comment>' . $outMode . '</comment>');
         $this->line('Set prefix: <comment>' . $setPrefix . '</comment>');
         $this->line('Icons: <comment>' . count($icons) . "</comment>");
         $this->newLine();
@@ -133,6 +137,8 @@ class IconifyExtractSvgs extends Command
             ]
         );
 
+        Artisan::call('icons:cache');
+
         if ($failed > 0) {
             $this->warn('Some icons failed. Fix the errors above and re-run the command.');
             return self::FAILURE;
@@ -199,6 +205,51 @@ SVG;
     private function packageRoot(): string
     {
         return $this->normalizePath(dirname(__DIR__, 2));
+    }
+
+    /**
+     * Decide where to write SVGs.
+     *
+     * Priority:
+     *  1) --path
+     *  2) --project
+     *  3) config('blade-iconify.export_to') + config('blade-iconify.custom_path')
+     *  4) package default: {package}/resources/svg
+     *
+     * @return array{0:string,1:string} [outputDirAbsolute, modeLabel]
+     */
+    private function resolveOutputDirectory(string $packageRoot): array
+    {
+        // 1) Explicit output path
+        $custom = $this->option('path');
+        if (is_string($custom) && trim($custom) !== '') {
+            return [$this->normalizePath(base_path(trim($custom))), 'cli:--path'];
+        }
+
+        // 2) Force project resources/svg
+        if ((bool) $this->option('project')) {
+            return [$this->normalizePath(resource_path('svg')), 'cli:--project'];
+        }
+
+        // 3) Config-driven
+        $mode = (string) (config('blade-iconify.export_to') ?? 'package');
+
+        if ($mode === 'project') {
+            return [$this->normalizePath(resource_path('svg')), 'config:project'];
+        }
+
+        if ($mode === 'custom') {
+            $rel = (string) (config('blade-iconify.custom_path') ?? '');
+            if (trim($rel) !== '') {
+                return [$this->normalizePath(base_path(trim($rel))), 'config:custom'];
+            }
+
+            // Misconfigured, fall back safely
+            return [$this->normalizePath($packageRoot . DIRECTORY_SEPARATOR . 'resources/svg'), 'config:custom (fallback:package)'];
+        }
+
+        // 4) Default: package
+        return [$this->normalizePath($packageRoot . DIRECTORY_SEPARATOR . 'resources/svg'), 'config:package'];
     }
 
     private function normalizePath(string $path): string

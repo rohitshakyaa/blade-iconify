@@ -10,7 +10,8 @@ Example icon ID:
 
 Generated SVG:
 
-- `resources/svg/material-symbols-light-10k-sharp.svg`
+- `resources/svg/material-symbols-light-10k-sharp.svg` (when `export_to=project`)
+- `{package}/resources/svg/material-symbols-light-10k-sharp.svg` (when `export_to=package`)
 
 Blade component:
 
