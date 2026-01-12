@@ -12,7 +12,8 @@
     "type": "library",
     "license": "MIT",
     "require": {
-        "blade-ui-kit/blade-icons": "^1.8"
+        "blade-ui-kit/blade-icons": "^1.8",
+        "iconify/json": "^2.2"
     },
     "autoload": {
         "psr-4": {
