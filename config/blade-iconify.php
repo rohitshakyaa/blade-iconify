@@ -26,7 +26,7 @@ return [
     | - This also controls where Blade Icons will look for the SVGs.
     | - For production, run: php artisan icons:cache
     */
-    'export_to' => 'package', // package|project|custom
+    'export_to' => 'project', // package|project|custom
 
     // Only used when export_to = "custom" (relative to base_path()).
     'custom_path' => null,
